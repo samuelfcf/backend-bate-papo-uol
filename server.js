@@ -27,6 +27,10 @@ server.get("/participants", (req, res) => {
 
 server.post("/participants", (req, res) => {
   const participant = req.body;
+  const participantExists = users.find(user => user.name === participant.name);
+  if (participantExists) {
+    return alert("insira novo nome!!")
+  }
   if (!participant.name) {
     res.status(400).send("Erro");
   } else {
@@ -113,6 +117,25 @@ server.post("/status", (req, res) => {
     res.status(200).send("status atualizado com sucesso")
   }
 })
+
+setInterval(() => {
+  for (let i = 0; i < users.length; i++) {
+    if ((Date.now() - users[i].lastStatus) > 10000) {
+      const newMessage = {
+        from: users[i].name,
+        to: "Todos",
+        text: "Sai da sala...",
+        type: "status",
+        time: dayjs().format("HH:mm:ss")
+      }
+      messages.push({
+        ...newMessage
+      });
+      users.splice(i, 1);
+      saveData();
+    }
+  }
+}, 15000)
 
 server.listen(4000, () => {
   console.clear();
